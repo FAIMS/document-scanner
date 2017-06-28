@@ -1,0 +1,133 @@
+<module>
+
+<User f="nodata">
+  <User>
+    <Users t="list" f="user" l="Control"/>
+  </User>
+</User>
+
+<Control f="nodata">
+  <Control>
+    <Create_New_Document l="Document"/>
+  </Control>
+  <search/>
+</Control>
+
+<Document>
+  <Document>
+    <Title f="id"/>
+    <Author/>
+    <Year_of_Publication b="decimal"/>
+    <Scan_Barcode t="button"/>
+    <Barcode/>
+    <Notes/>
+  </Document>
+  <Attach_Photos>
+    <Guide t="webview" f="nolabel">
+      <markdown>
+## Guide: Attaching Recent Photos From Open Camera
+
+1. Take one or more photos:
+    1. With this record still open, start the Open Camera app.
+    1. Ensure that photos are being taken as .jpg files:
+    1. Take a photo using the camera icon.
+
+1. Attach the photos to this record:
+    1. Return to the currently open record.
+    1. Tap the "Attach New Photos" button (below). A dialogue box which lists the photos taken in Step 2 will be displayed. These files are now attached to this record.
+      </markdown>
+    </Guide>
+    <Attach_New_Photos t="camera"/>
+  </Attach_Photos>
+</Document>
+
+<logic><![CDATA[
+/***************************** PHOTO ATTACHMENTS ******************************/
+delOnEvent(
+    "Document/Attach_Photos/Attach_New_Photos_Button_1",
+    "click",
+    "attachPictureTo(\"Document/Attach_Photos/Attach_New_Photos\")"
+);
+addOnEvent(
+    "Document/Attach_Photos/Attach_New_Photos_Button_1",
+    "click",
+    "attachNewFiles()"
+);
+addOnEvent(
+    "Document",
+    "show",
+    "lastFileList = getFileList()"
+);
+
+List getFileList() {
+  String dirPath   = "/sdcard/DCIM/OpenCamera";
+  File   dir       = new File(dirPath);
+  if (!dir.exists()) {
+    return new ArrayList();
+  }
+  File[] fileArray = dir.listFiles();
+  List   files     = Arrays.asList(fileArray);
+         files     = new ArrayList(files);       // This makes `files` mutable
+  // Sort the list of files by date modified
+  Comparator compareModDate = new Comparator() {
+      public int compare(File a, File b) {
+        long aMod = a.lastModified();
+        long bMod = b.lastModified();
+        if (aMod > bMod) return +1;
+        if (aMod < bMod) return -1;
+        return 0;
+      }
+  };
+  Collections.sort(files, compareModDate);
+  return files;
+}
+
+String fileListToString(List files) {
+  String s = "";
+  for (i = 0; i < files.size(); i++)
+    s += files.get(i).getName() + "\n";
+  return s;
+}
+
+void attachAll(List files) {
+  for (i = 0; i < files.size(); i++) {
+    ref      = "Document/Attach_Photos/Attach_New_Photos";
+    filePath = files.get(i).getAbsolutePath();
+    addPicture(ref, filePath);
+  }
+}
+
+List attachNewFiles() {
+  thisFileList = getFileList();
+
+  newFiles = new ArrayList(thisFileList);
+  newFiles = getFileList();
+  newFiles.removeAll(lastFileList);
+
+  lastFileList = thisFileList;
+
+  if (newFiles.size() == 0) {
+    showWarning("No new files found", "");
+  } else {
+    attachAll(newFiles);
+    s = fileListToString(newFiles);
+    showWarning("New files found", s);
+  }
+  return newFiles;
+}
+
+/********************************** BARCODE ***********************************/
+addOnEvent("Document/Document/Scan_Barcode", "click", "scanCode()");
+
+void scanCode() {
+  scanCode("updateBarcode()");
+}
+
+void updateBarcode() {
+  String ref = "Document/Document/Barcode";
+  String lsc = getLastScanContents();
+  setFieldValue(ref, lsc);
+}
+]]></logic>
+
+</module>
