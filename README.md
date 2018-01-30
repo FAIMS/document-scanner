@@ -31,3 +31,13 @@ The module can be downloaded from this GitHub repository.
 ## Contact info:
 If you have any questions about the module, please contact the FAIMS team at **enquiries@fedarch.org** and we will get back to you within one business day.
 
+## Screenshots:
+
+<p align="left">
+  <img src="https://github.com/FAIMS/document-scanner/blob/master/screenshots/Screenshot_20170913-134610.png" width="250"/>
+  <img src="https://github.com/FAIMS/document-scanner/blob/master/screenshots/Screenshot_20170913-134616.png" width="250"/>
+  <img src="https://github.com/FAIMS/document-scanner/blob/master/screenshots/Screenshot_20170913-134621.png" width="250"/>
+</p>
+
+
+
